@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Stars } from "@/app/components/stars";
 
 type Review = {
   id: number;
@@ -20,20 +21,6 @@ type RestaurantData = {
   latestReview: Review | null;
   reviews: Review[];
 };
-
-function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
-  return (
-    <div className="flex gap-0.5 text-accent">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} className={i <= rating ? "" : "text-line"}>
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
-          </svg>
-        </span>
-      ))}
-    </div>
-  );
-}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -64,61 +51,79 @@ export default function RestaurantPage() {
 
   if (notFound) {
     return (
-      <main className="mx-auto max-w-[560px] px-6 py-16">
+      <main className="mx-auto w-full max-w-[560px] px-6 py-16">
         <h1 className="text-xl font-semibold">Restaurant not found</h1>
         <p className="mt-2 text-sm text-muted">No restaurant has that ID.</p>
+        <Link
+          href="/"
+          className="mt-6 inline-block text-sm font-medium text-accent"
+        >
+          Back to home
+        </Link>
       </main>
     );
   }
 
   if (!data) {
     return (
-      <main className="mx-auto max-w-[560px] px-6 py-16 text-sm text-muted">
+      <main className="mx-auto w-full max-w-[560px] px-6 py-16 text-sm text-muted">
         Loading…
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-[560px] px-6 py-12">
-      <header className="border-b border-line pb-8">
-        <h1 className="text-2xl font-semibold tracking-tight">{data.name}</h1>
-        <p className="mt-1 text-sm text-muted">
+    <main className="mx-auto w-full max-w-[560px] px-6 py-10">
+      <header>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted">
+          Restaurant
+        </p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">{data.name}</h1>
+        <p className="mt-2 text-sm text-muted">
           {data.cuisine} · {data.area}
         </p>
       </header>
 
       {data.totalReviews === 0 ? (
-        <section className="py-16 text-center">
+        <section className="mt-10 rounded-xl border border-line bg-white px-6 py-16 text-center">
           <p className="text-lg font-medium">No reviews yet</p>
           <p className="mt-2 text-sm text-muted">Be the first to leave one.</p>
           <Link
             href={`/review/${params.id}`}
-            className="mt-6 inline-block rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white"
+            className="mt-6 inline-block rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
           >
             Write a review
           </Link>
         </section>
       ) : (
         <>
-          <section className="flex items-end gap-3 py-8">
-            <span className="text-6xl font-semibold leading-none tracking-tight">
-              {data.averageRating}
-            </span>
-            <span className="pb-1 text-sm text-muted">
-              {data.totalReviews} review{data.totalReviews === 1 ? "" : "s"}
-            </span>
+          <section className="mt-10 rounded-xl border border-line bg-white px-6 py-6">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted">
+              Average rating
+            </p>
+            <div className="mt-2 flex items-end gap-2">
+              <span className="text-6xl font-semibold leading-none tracking-tight">
+                {data.averageRating}
+              </span>
+              <span className="pb-1 text-sm text-muted">
+                {data.totalReviews} review{data.totalReviews === 1 ? "" : "s"}
+              </span>
+            </div>
           </section>
 
-          <section className="rounded-xl border border-line bg-white p-6">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted">
+          <section className="mt-8 rounded-xl border border-line bg-white p-6">
+            <p className="text-xs font-medium uppercase tracking-wider text-accent">
               Latest review
             </p>
             {data.latestReview && (
               <div className="mt-3">
                 <Stars rating={data.latestReview.rating} />
-                <p className="mt-2 text-base leading-relaxed">{data.latestReview.comment}</p>
-                <p className="mt-2 text-xs text-muted">{formatDate(data.latestReview.createdAt)}</p>
+                <p className="mt-3 text-base leading-relaxed">
+                  {data.latestReview.comment}
+                </p>
+                <p className="mt-2 text-xs text-muted">
+                  {formatDate(data.latestReview.createdAt)}
+                </p>
               </div>
             )}
           </section>
@@ -128,24 +133,26 @@ export default function RestaurantPage() {
               <h2 className="text-xs font-medium uppercase tracking-wider text-muted">
                 Earlier reviews
               </h2>
-              <ul className="divide-y divide-line">
+              <ul className="mt-2 divide-y divide-line rounded-xl border border-line bg-white px-6">
                 {data.reviews.map((review) => (
                   <li key={review.id} className="py-5">
                     <Stars rating={review.rating} />
                     <p className="mt-2 text-sm leading-relaxed text-foreground">
                       {review.comment}
                     </p>
-                    <p className="mt-2 text-xs text-muted">{formatDate(review.createdAt)}</p>
+                    <p className="mt-2 text-xs text-muted">
+                      {formatDate(review.createdAt)}
+                    </p>
                   </li>
                 ))}
               </ul>
             </section>
           )}
 
-          <div className="mt-10">
+          <div className="mt-8">
             <Link
               href={`/review/${params.id}`}
-              className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white"
+              className="inline-block rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
             >
               Write a review
             </Link>
